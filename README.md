@@ -37,7 +37,7 @@ Aplikacja uruchomi się pod adresem: `http://localhost:5173`
 
 ## Testy automatyczne
 
-Dbamy o jakość! Projekt jest podłączony pod GitHub Actions, co oznacza, że każdy push jest automatycznie sprawdzany. Możesz też uruchomić testy ręcznie:
+Projekt jest podłączony pod GitHub Actions, co oznacza, że każdy push do maina (oraz pull requesty) jest automatycznie sprawdzany. Możesz też uruchomić testy ręcznie:
 
 **Testy Frontendu (React):**
 ```bash
