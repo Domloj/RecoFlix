@@ -4,49 +4,48 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-// import { HomePage } from './pages/home/HomePage';
+import { Navbar } from './components/Navbar';
+import { HomePage } from './pages/home/HomePage';
+import { PublicRoute } from './components/PublicRoute';
+import classes from './App.module.css';
 
 function App() {
   return (
-    // AuthProvider musi otaczać Routes, by cała aplikacja wiedziała o logowaniu
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* Publiczne ścieżki - dostępne dla każdego */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          
-          {/* Chroniona ścieżka - tylko dla zalogowanych (dowolna rola) */}
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Przykład na przyszłość - strona tylko dla admina */}
-          {/* <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } 
-          /> */}
-
-          {/* <Route 
-            path="/reco" 
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            } 
-          /> */}
-        </Routes>
+        <div className={classes.appWrapper}>
+          <Navbar />
+          <main className={classes.mainContent}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route 
+                path="/login" 
+                element={
+                  <PublicRoute>
+                    <LoginPage />
+                  </PublicRoute>
+                } 
+              />
+              <Route 
+                path="/register" 
+                element={
+                  <PublicRoute>
+                    <RegisterPage />
+                  </PublicRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </div>
       </BrowserRouter>
     </AuthProvider>
   );

@@ -29,7 +29,7 @@ export function LoginPage() {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      navigate('/profile'); 
+      navigate('/'); 
     } catch (err: any) {
       setError('Nieprawidłowy email lub hasło.');
     }
