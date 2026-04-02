@@ -1,15 +1,15 @@
-# 🎬 RecoFlix
+# RecoFlix
 
 RecoFlix to nowoczesna aplikacja webowa integrująca inteligentny silnik rekomendacji filmów (MovieLens) z przejrzystym interfejsem użytkownika.
 
-## 🛠️ Stack Technologiczny
+## Stack Technologiczny
 * **Frontend:** React (Vite), TypeScript, Mantine UI, Vitest
 * **Backend:** Python, FastAPI, Pytest
 * **Chmura / Auth:** Firebase
 
 ---
 
-## 🚀 Jak uruchomić projekt lokalnie?
+## Jak uruchomić projekt lokalnie?
 
 ### 1. Backend (Silnik AI i API)
 ⚠️ **Ważne:** Zanim zaczniesz, upewnij się, że posiadasz prywatny klucz dostępu do Firebase (`serviceAccountKey.json`) i umieściłeś go w folderze `backend/`.
@@ -35,7 +35,7 @@ Aplikacja uruchomi się pod adresem: `http://localhost:5173`
 
 ---
 
-## 🧪 Testy automatyczne
+## Testy automatyczne
 
 Dbamy o jakość! Projekt jest podłączony pod GitHub Actions, co oznacza, że każdy push jest automatycznie sprawdzany. Możesz też uruchomić testy ręcznie:
 
