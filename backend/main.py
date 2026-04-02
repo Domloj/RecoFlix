@@ -1,36 +1,38 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import firebase_admin
+from firebase_admin import auth, credentials
 
-app = FastAPI(title="RecoFlix API")
+app = FastAPI()
+security = HTTPBearer()
 
-# Konfiguracja CORS (kluczowe, by React z portu 5173 mógł gadać z Pythonem z portu 8000)
+cred = credentials.Certificate("./serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], 
-    allow_credentials=True,
+    allow_origins=["http://localhost:5173"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Endpoint testowy
-@app.get("/")
-def read_root():
-    return {"message": "Witaj w API RecoFlix!"}
+async def get_current_user(res: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        decoded_token = auth.verify_id_token(res.credentials)
+        return decoded_token
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired Firebase token",
+        )
 
-# Endpoint z naszymi rekomendacjami i XAI (na razie zwracamy mock data)
-@app.get("/api/recommendations")
-def get_recommendations():
-    return [
-        {
-            "id": 1,
-            "title": "Incepcja (2010)",
-            "match": 98,
-            "desc": "Złodziej, który wykrada korporacyjne sekrety za pomocą technologii współdzielenia snów...",
-            "image": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-            "xaiReasons": [
-                {"label": "Ulubiony reżyser (Nolan)", "value": 45, "color": "blue"},
-                {"label": "Gatunek (Sci-Fi)", "value": 30, "color": "grape"},
-                {"label": "Podobni użytkownicy", "value": 25, "color": "teal"}
-            ]
-        }
-    ]
+@app.get("/api/engine-status")
+async def get_status(user: dict = Depends(get_current_user)):
+    return {
+        "status": "online",
+        "engine": "RecoFlix-XAI-v1",
+        "database": "MovieLens-100k",
+        "user_uid": user["uid"]
+    }
+    
