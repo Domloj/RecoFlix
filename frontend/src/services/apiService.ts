@@ -2,17 +2,18 @@ import { auth } from '../config/firebase';
 
 const API_URL = 'http://localhost:8000/api';
 
-export const fetchWithAuth = async (endpoint: string) => {
+export const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
   const user = auth.currentUser;
   if (!user) throw new Error("Użytkownik niezalogowany");
 
   const token = await user.getIdToken();
 
   const response = await fetch(`${API_URL}${endpoint}`, {
-    method: 'GET',
+    ...options,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}` 
+      'Authorization': `Bearer ${token}`,
+      ...options.headers,
     },
   });
 
