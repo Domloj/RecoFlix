@@ -4,6 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
 from routers import chat
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 app = FastAPI()
 
@@ -12,7 +17,7 @@ firebase_admin.initialize_app(cred)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[frontend_url],
     allow_methods=["*"],
     allow_headers=["*"],
 )

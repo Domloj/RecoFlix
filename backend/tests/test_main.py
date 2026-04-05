@@ -18,7 +18,7 @@ def test_get_status_no_token():
     assert response.json() == {"detail": "Not authenticated"}
 
 
-@patch("main.auth.verify_id_token")
+@patch("dependencies.auth.verify_id_token")
 def test_get_status_invalid_token(mock_verify_token):
     """
     Test 2: Użytkownik podaje zły/wygasły token.
