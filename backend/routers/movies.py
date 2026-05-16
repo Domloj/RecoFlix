@@ -27,4 +27,4 @@ async def list_movies(
     page_size: int = Query(50, ge=1, le=200),
     query: str | None = Query(None, min_length=1, max_length=100),
 ):
-    return movies_service.list_movies(page=page, page_size=page_size, query=query)
+    return await movies_service.list_movies(page=page, page_size=page_size, query=query)

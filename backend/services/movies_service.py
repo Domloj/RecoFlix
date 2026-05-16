@@ -1,14 +1,14 @@
+import asyncio
 import csv
 import json
 import logging
 import os
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import requests
+import httpx
 
 from constants import (
     DEFAULT_POSTER_URL,
@@ -34,10 +34,10 @@ class TmdbClient:
     def __init__(self, api_key: str | None, language: str | None) -> None:
         self.api_key = api_key
         self.language = language
-        self.session = requests.Session()
 
-    @lru_cache(maxsize=4096)
-    def fetch_details(self, tmdb_id: int, language: str | None) -> TmdbDetails | None:
+    async def fetch_details(
+        self, client: httpx.AsyncClient, tmdb_id: int, language: str | None
+    ) -> TmdbDetails | None:
         if not self.api_key:
             return None
 
@@ -46,11 +46,8 @@ class TmdbClient:
             params: dict[str, str] = {"api_key": self.api_key}
             if language:
                 params["language"] = language
-            response = self.session.get(
-                url,
-                params=params,
-                timeout=4,
-            )
+                
+            response = await client.get(url, params=params, timeout=4.0)
             if response.status_code != 200:
                 return None
 
@@ -61,7 +58,7 @@ class TmdbClient:
                 f"{TMDB_IMAGE_BASE_URL}{poster_path}" if poster_path else None
             )
             return TmdbDetails(poster_url=poster_url, overview=overview)
-        except requests.RequestException as exc:
+        except httpx.RequestError as exc:
             logger.warning("TMDB request failed for %s: %s", tmdb_id, exc)
             return None
 
@@ -124,11 +121,15 @@ class MoviesService:
         self.tmdb_language = tmdb_language.strip() if tmdb_language else None
         self.tmdb_client = TmdbClient(os.getenv("TMDB_API_KEY"), self.tmdb_language)
         self.tmdb_cache = TmdbCache(TMDB_CACHE_PATH)
+        
+        # Load static files on initialization
         self.movies = self._load_movies_db()
         self.tmdb_links = self._load_tmdb_links()
         self.movie_tags = self._load_tags()
 
-    def list_movies(self, page: int = 1, page_size: int = 50, query: str | None = None) -> dict[str, Any]:
+    async def list_movies(
+        self, page: int = 1, page_size: int = 50, query: str | None = None
+    ) -> dict[str, Any]:
         page = max(page, 1)
         page_size = max(1, min(page_size, 200))
         filtered_movies = self._filter_movies(query)
@@ -137,16 +138,32 @@ class MoviesService:
         end_index = start_index + page_size
         page_movies = filtered_movies[start_index:end_index]
 
+        tmdb_details_map: dict[int, TmdbDetails] = {}
+
+        # Używamy httpx.AsyncClient do współbieżnego pobrania wszystkich brakujących plakatów
+        async with httpx.AsyncClient() as client:
+            tasks = []
+            for movie in page_movies:
+                movie_id = int(movie.get("id", 0))
+                tmdb_id = self.tmdb_links.get(movie_id)
+                if tmdb_id:
+                    tasks.append(self._fetch_tmdb_for_movie(client, movie_id, tmdb_id))
+
+            if tasks:
+                fetched_results = await asyncio.gather(*tasks)
+                for m_id, details in fetched_results:
+                    if details:
+                        tmdb_details_map[m_id] = details
+
         results: list[dict[str, Any]] = []
 
         for movie in page_movies:
-            movie_id = int(movie.get("id"))
-            title = str(movie.get("title"))
-            release_year = str(movie.get("release_year"))
+            movie_id = int(movie.get("id", 0))
+            title = str(movie.get("title", ""))
+            release_year = str(movie.get("release_year", ""))
             genres = movie.get("genres") or []
 
-            tmdb_id = self.tmdb_links.get(movie_id)
-            tmdb_details = self._get_tmdb_details(tmdb_id) if tmdb_id else None
+            tmdb_details = tmdb_details_map.get(movie_id)
             poster_url = (
                 tmdb_details.poster_url if tmdb_details and tmdb_details.poster_url else DEFAULT_POSTER_URL
             )
@@ -177,6 +194,19 @@ class MoviesService:
             "total": total,
         }
 
+    async def _fetch_tmdb_for_movie(
+        self, client: httpx.AsyncClient, movie_id: int, tmdb_id: int
+    ) -> tuple[int, TmdbDetails | None]:
+        """Helper do asynchronicznego pobierania i mapowania na movie_id."""
+        cached = self.tmdb_cache.get(tmdb_id, self.tmdb_language)
+        if cached:
+            return movie_id, cached
+
+        fresh = await self.tmdb_client.fetch_details(client, tmdb_id, self.tmdb_language)
+        if fresh:
+            self.tmdb_cache.set(tmdb_id, self.tmdb_language, fresh)
+        return movie_id, fresh
+
     def _load_movies_db(self) -> list[dict[str, Any]]:
         with MOVIES_DB_PATH.open("r", encoding="utf-8") as file:
             return json.load(file)
@@ -192,16 +222,6 @@ class MoviesService:
             for movie in self.movies
             if normalized_query in str(movie.get("title", "")).lower()
         ]
-
-    def _get_tmdb_details(self, tmdb_id: int) -> TmdbDetails | None:
-        cached = self.tmdb_cache.get(tmdb_id, self.tmdb_language)
-        if cached:
-            return cached
-
-        fresh = self.tmdb_client.fetch_details(tmdb_id, self.tmdb_language)
-        if fresh:
-            self.tmdb_cache.set(tmdb_id, self.tmdb_language, fresh)
-        return fresh
 
     def _load_tmdb_links(self) -> dict[int, int]:
         if not LINKS_CSV_PATH.exists():
