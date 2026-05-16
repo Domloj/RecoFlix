@@ -57,3 +57,4 @@ Thumbs.db
 # =========================
 ml-100k/
 tmdb_cache.json
+data/movies_database.json
