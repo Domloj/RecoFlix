@@ -19,3 +19,16 @@
 .featureCard {
   background-color: rgba(26, 27, 30, 0.5);
 }
+
+.libraryCallout {
+  margin-top: 60px;
+}
+
+.libraryCard {
+  background: linear-gradient(120deg, rgba(51, 154, 240, 0.18), rgba(34, 211, 238, 0.1));
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.libraryButton {
+  box-shadow: 0 10px 20px rgba(34, 211, 238, 0.2);
+}

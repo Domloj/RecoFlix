@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/home/HomePage';
+import { MoviesPage } from './pages/movies/MoviesPage';
 import { PublicRoute } from './components/PublicRoute';
 import classes from './App.module.css';
 import { ChatWidget } from './components/ChatWidget';
@@ -40,6 +41,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/movies" 
+                element={
+                  <ProtectedRoute>
+                    <MoviesPage />
                   </ProtectedRoute>
                 } 
               />
