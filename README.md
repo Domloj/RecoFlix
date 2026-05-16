@@ -12,7 +12,7 @@ RecoFlix to nowoczesna aplikacja webowa integrująca inteligentny silnik rekomen
 ## Jak uruchomić projekt lokalnie?
 
 ### 1. Backend (Silnik AI i API)
-⚠️ **Ważne:** Zanim zaczniesz, upewnij się, że posiadasz prywatny klucz dostępu do Firebase (`serviceAccountKey.json`) i umieściłeś go w folderze `backend/`.
+**Ważne:** Zanim zaczniesz, upewnij się, że posiadasz prywatny klucz dostępu do Firebase (`serviceAccountKey.json`) i umieściłeś go w folderze `backend/`.
 
 ```bash
 cd backend
