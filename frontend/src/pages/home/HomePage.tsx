@@ -48,7 +48,14 @@ export function HomePage() {
         </motion.div>
 
         <motion.div variants={fadeInUp}>
-          <Text c="dimmed" ta="center" size="xl" mb="xl" className={classes.heroText}>
+          <Text 
+            c="dimmed" 
+            ta="center" 
+            size="xl" 
+            mb="xl" 
+            maw={700} 
+            mx="auto"
+          >
             Masz dość filmów „polecanych dla Ciebie", które kompletnie nie trafiają w gust?
             RecoFlix pokazuje, dlaczego coś trafiło na Twoją listę — nie ukrywa logiki za kurtyną.
             Zobaczysz konkretne powody, a nie tylko gwiazdki.

@@ -8,6 +8,7 @@ import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/home/HomePage';
 import { PublicRoute } from './components/PublicRoute';
 import classes from './App.module.css';
+import { ChatWidget } from './components/ChatWidget';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
             </Routes>
           </main>
         </div>
+        <ChatWidget />
       </BrowserRouter>
     </AuthProvider>
   );

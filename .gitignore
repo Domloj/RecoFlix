@@ -18,7 +18,7 @@ backend/env/
 backend/__pycache__/
 backend/*.py[cod]
 backend/*$py.class
-backend/.pytest_cache/\
+backend/.pytest_cache/
 backend/serviceAccountKey.json
 __pycache__/
 *.pyc
@@ -53,3 +53,8 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# =========================
+# Zbiór danych
+# =========================
+ml-100k/

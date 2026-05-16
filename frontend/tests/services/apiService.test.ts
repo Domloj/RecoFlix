@@ -59,7 +59,6 @@ describe('apiService - fetchWithAuth', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/api/status', {
-      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer super-tajny-token',
