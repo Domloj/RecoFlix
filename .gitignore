@@ -23,6 +23,8 @@ backend/serviceAccountKey.json
 __pycache__/
 *.pyc
 .pytest_cache/
+.venv
+venv
 
 # =========================
 # Pliki środowiskowe i sekrety
