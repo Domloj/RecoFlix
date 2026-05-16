@@ -21,6 +21,7 @@ export function MoviesPage() {
     const loadMovies = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const data = await fetchMoviesPage({
           page,
           pageSize,

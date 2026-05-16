@@ -71,7 +71,7 @@ class HybridRecommender:
             raise ValueError("Silnik nie został jeszcze zainicjalizowany.")
 
         try:
-            idx = self.movies[self.movies['title'].str.contains(target_title, case=False, na=False)].index[0]
+            idx = self.movies[self.movies['title'].str.contains(target_title, case=False, na=False, regex=False)].index[0]
         except IndexError:
             return None 
             
