@@ -1,0 +1,13 @@
+jupyterlab
+notebook
+ipykernel
+pandas
+numpy
+scikit-learn
+shap
+sentence-transformers
+matplotlib
+seaborn
+pillow
+python-dotenv
+debugpy

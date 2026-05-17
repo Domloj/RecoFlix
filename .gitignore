@@ -23,6 +23,8 @@ backend/serviceAccountKey.json
 __pycache__/
 *.pyc
 .pytest_cache/
+.venv
+venv
 
 # =========================
 # Pliki środowiskowe i sekrety
@@ -33,7 +35,6 @@ __pycache__/
 
 # =========================
 # Machine Learning / Duże pliki danych
-# (Ważne, by nie zapchać GitHuba np. datasetem MovieLens)
 # =========================
 *.csv
 *.tsv
@@ -41,7 +42,6 @@ __pycache__/
 *.pkl
 *.h5
 *.model
-backend/data/
 backend/models/
 .ipynb_checkpoints/
 
@@ -58,3 +58,4 @@ Thumbs.db
 # Zbiór danych
 # =========================
 ml-100k/
+tmdb_cache.json

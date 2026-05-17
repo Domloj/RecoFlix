@@ -63,7 +63,6 @@ jobs:
           run: |
             python -m pip install --upgrade pip
             pip install -r requirements.txt
-            # Instalujemy pakiety testowe (na wypadek, gdybyś nie dodał ich jeszcze do requirements.txt)
             pip install pytest httpx
 
         - name: Lint with flake8

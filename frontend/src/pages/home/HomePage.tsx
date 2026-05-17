@@ -1,7 +1,7 @@
 import { Container, Title, Text, Button, Group, Badge, Paper } from '@mantine/core';
 import { motion, type Variants } from 'framer-motion'; 
 import { Link } from 'react-router-dom';
-import { IconSparkles, IconBrain } from '@tabler/icons-react';
+import { IconSparkles, IconBrain, IconMovie } from '@tabler/icons-react';
 import { useAuth } from '../../context/AuthContext';
 import classes from './styles/HomePage.module.css';
 
@@ -78,6 +78,35 @@ export function HomePage() {
             </Button>
           </Group>
         </motion.div>
+
+        {user && (
+          <motion.div variants={fadeInUp} className={classes.libraryCallout}>
+            <Paper withBorder shadow="md" p="xl" radius="md" className={classes.libraryCard}>
+              <Group justify="space-between" align="center" wrap="wrap">
+                <div>
+                  <Text size="xl" fw={800} mb={6}>
+                    Start bez ocen? Nic nie szkodzi.
+                  </Text>
+                  <Text c="dimmed" maw={520}>
+                    Zajrzyj do pełnej biblioteki filmów i wybierz coś, co lubisz. To przyspieszy
+                    dopasowanie rekomendacji.
+                  </Text>
+                </div>
+                <Button
+                  component={Link}
+                  to="/movies"
+                  size="md"
+                  radius="xl"
+                  variant="light"
+                  leftSection={<IconMovie size={20} />}
+                  className={classes.libraryButton}
+                >
+                  Przeglądaj wszystkie filmy
+                </Button>
+              </Group>
+            </Paper>
+          </motion.div>
+        )}
 
         <motion.div variants={fadeInUp} className={classes.featuresSection}>
           <Group grow align="flex-start">
