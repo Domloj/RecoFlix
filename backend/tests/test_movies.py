@@ -89,9 +89,12 @@ def test_list_movies_filters_paginates_and_enriches(monkeypatch, tmp_path):
 def test_list_movies_uses_cache_and_fallbacks(monkeypatch, tmp_path):
     import services.movies_service as ms
 
+    language = ms.TMDB_LANGUAGE_DEFAULT
+    monkeypatch.setenv("TMDB_LANGUAGE", language)
+
     paths = _build_test_files(tmp_path)
     cached = {
-        f"101:{ms.TMDB_LANGUAGE_DEFAULT}": {
+        f"101:{language}": {
             "poster_url": "https://img.test/cached.jpg",
             "overview": None,
         }
