@@ -14,7 +14,7 @@ export function AdminUsersTable({
   if (isLoading) {
     return (
       <Center py={64}>
-        <Loader color="blue" size="lg" />
+        <Loader color="blue" size="lg" aria-label="Ładowanie użytkowników" />
       </Center>
     );
   }
