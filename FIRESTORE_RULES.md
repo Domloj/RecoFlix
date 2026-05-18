@@ -13,24 +13,26 @@ Poniższe reguły implementują model bezpieczeństwa oparty na **kontroli dost�
 | Operacja | Warunki | Opis |
 |----------|---------|------|
 | **READ** | `auth.uid == userId` | Użytkownik czyta tylko swój profil |
-| **CREATE** | ❌ Zabronienie | Backend obsługuje tworzenie (Firebase Admin SDK) |
-| **UPDATE** | Tylko pola: `username`, `email`, `profilePicture`, `preferences`; Pole `role` nie może zmienić | Użytkownik edytuje swoje dane, ale nie może zmienić roli |
-| **DELETE** | ❌ Zabronienie | Profil nie może być usunięty przez klienta |
+| **CREATE** | `request.auth != null && request.auth.uid == userId` | Zalogowany użytkownik może utworzyć własny dokument profilu |
+| **UPDATE** | Administrator może aktualizować także `role`; właściciel dokumentu może aktualizować tylko dozwolone pola: `username`, `email`, `profilePicture`, `preferences`, `role`, `createdAt` | Reguły rozróżniają uprawnienia administratora i właściciela dokumentu |
+| **DELETE** | Tylko administrator | Usunięcie profilu przez klienta jest dozwolone wyłącznie dla administratora |
 
 **Walidacje:**
 - `username` - tekst, 1-50 znaków (obowiązkowe)
 - `email` - tekst (opcjonalne)
 - `profilePicture` - string URL (opcjonalne)
 - `preferences` - mapa/obiekt (opcjonalne)
-- `role` - **blokada zmian** (pozostaje `user` lub `admin` z inicjalizacji)
+- `role` - pole podlega ograniczeniom reguł; administrator może je aktualizować, a dokumentacja musi być zgodna z dopuszczonymi kluczami w `firestore.rules`
+- `createdAt` - pole uwzględnione w dozwolonych kluczach dla aktualizacji własnego dokumentu
 
 ## Zasady Ogólne
 
 1. **Domyślnie blokada** - `match /{document=**} { allow read, write: if false; }`
-2. **Autentykacja wymagana** - Wszystkie operacje wymagają zalogowanego użytkownika (`request.auth != null`)
-3. **Kontrola właściciela** - Użytkownik może edytować/usuwać tylko swoje dane (`auth.uid == userId`)
-4. **Walidacja danych** - Każde pole jest walidowane na poziomie reguł
-5. **Rola jest niezmienna** - Zwykły użytkownik (`user`) nie może zmienić się na administratora (`admin`)
+2. **Autentykacja wymagana** - Operacje modyfikujące wymagają zalogowanego użytkownika (`request.auth != null`)
+3. **Kontrola właściciela** - Użytkownik może czytać i modyfikować własny dokument zgodnie z ograniczeniami reguł (`auth.uid == userId`)
+4. **Uprawnienia administratora** - Administrator ma szersze uprawnienia, w tym aktualizację `role` i usuwanie dokumentów użytkowników
+5. **Walidacja danych** - Każde pole jest walidowane na poziomie reguł
+6. **Rola nie jest dowolnie zmienialna przez zwykłego użytkownika** - Uprawnienia do zmiany `role` wynikają z warunków w `firestore.rules`, a nie z samego klienta
 
 ---
 
