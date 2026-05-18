@@ -23,7 +23,7 @@ export function AdminFilters({
         <div>
           <div className={classes.sectionTitle}>Użytkownicy</div>
           <div className={classes.sectionDescription}>
-            Edytuj nazwę i rolę konta. Własny admin nie może przypadkiem zdemontować swojej roli.
+            Edytuj nazwę i rolę konta. Administrator nie może przypadkiem odebrać sobie roli.
           </div>
         </div>
 
