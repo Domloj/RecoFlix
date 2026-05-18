@@ -13,7 +13,7 @@ def _bootstrap_firebase() -> None:
     service_account_path = backend_dir / "serviceAccountKey.json"
 
     if not service_account_path.exists():
-                raise FileNotFoundError(f"Brak pliku serviceAccountKey.json: {service_account_path}")
+        raise FileNotFoundError(f"Brak pliku serviceAccountKey.json: {service_account_path}")
 
     if not firebase_admin._apps:
         cred = credentials.Certificate(str(service_account_path))
