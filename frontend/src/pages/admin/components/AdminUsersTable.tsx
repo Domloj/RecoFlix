@@ -76,7 +76,7 @@ export function AdminUsersTable({
                     size="xs"
                     onClick={() => onSaveUser(record)}
                     loading={isSavingId === record.uid}
-                    disabled={!hasChanges || (isCurrentAdmin && draft?.role !== record.role)}
+                    disabled={!hasChanges}
                   >
                     Zapisz
                   </Button>
