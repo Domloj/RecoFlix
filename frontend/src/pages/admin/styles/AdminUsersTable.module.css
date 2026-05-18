@@ -1,0 +1,24 @@
+.tableShell {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 920px;
+}
+
+.actionsColumn {
+  width: 120px;
+}
+
+.userCell {
+  display: grid;
+  gap: 8px;
+}
+
+.inlineInput {
+  min-width: 220px;
+}
+
+.inlineSelect {
+  min-width: 160px;
+}

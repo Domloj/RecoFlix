@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
 from routers import chat, recommendations, movies
+from routers import admin
 from services.recommender_engine import recommender
 import os
 from dotenv import load_dotenv
@@ -33,6 +34,7 @@ app.add_middleware(
 app.include_router(chat.router)
 app.include_router(recommendations.router)
 app.include_router(movies.router)
+app.include_router(admin.router)
 
 @app.get("/api/engine-status")
 async def get_status(user: dict = Depends(get_current_user)):

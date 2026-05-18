@@ -2,7 +2,7 @@ import { Group, Button, Text, Container, Flex, Box } from '@mantine/core';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { logoutUser } from '../services/authService';
-import { IconMovie, IconLogout, IconUser } from '@tabler/icons-react';
+import { IconMovie, IconLogout, IconShield, IconUser } from '@tabler/icons-react';
 import classes from './styles/Navbar.module.css';
 
 export function Navbar() {
@@ -40,6 +40,17 @@ export function Navbar() {
           <Group>
             {user ? (
               <>
+                {user.role === 'admin' && (
+                  <Button 
+                    component={Link} 
+                    to="/admin" 
+                    variant="subtle" 
+                    color="cyan" 
+                    leftSection={<IconShield size={18} />}
+                  >
+                    Admin
+                  </Button>
+                )}
                 <Button 
                   component={Link} 
                   to="/profile" 

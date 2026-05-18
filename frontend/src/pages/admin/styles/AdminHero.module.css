@@ -1,0 +1,18 @@
+.hero {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border-radius: 28px;
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.24), transparent 45%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.34);
+}
+
+.title {
+  color: #f8fafc;
+}
+
+.subtitle {
+  max-width: 70ch;
+}
