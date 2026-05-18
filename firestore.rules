@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /users/{userId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isAdmin() {
+        return isSignedIn() && request.auth.token.admin == true;
+      }
+
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      allow create: if isSignedIn()
+                    && request.auth.uid == userId
+                    && request.resource.data.keys().hasOnly(['username', 'email', 'role', 'createdAt'])
+                    && request.resource.data.username is string
+                    && request.resource.data.username.size() > 0
+                    && request.resource.data.username.size() <= 50
+                    && request.resource.data.email is string
+                    && request.resource.data.role == 'user'
+                    && request.resource.data.createdAt is string;
+      
+      allow update: if isAdmin()
+                    && request.resource.data.keys().hasOnly(['username', 'email', 'role', 'createdAt', 'profilePicture', 'preferences'])
+                    && request.resource.data.username is string
+                    && request.resource.data.username.size() > 0
+                    && request.resource.data.username.size() <= 50
+                    && request.resource.data.email is string
+                    && request.resource.data.role in ['user', 'admin']
+                    && (!('profilePicture' in request.resource.data) || request.resource.data.profilePicture is string)
+                    && (!('preferences' in request.resource.data) || request.resource.data.preferences is map)
+                    || isSignedIn()
+                    && request.auth.uid == userId
+                    && request.resource.data.keys().hasOnly(['username', 'email', 'profilePicture', 'preferences', 'role', 'createdAt'])
+                    && request.resource.data.username is string
+                    && request.resource.data.username.size() > 0
+                    && request.resource.data.username.size() <= 50
+                    && (!('email' in request.resource.data) || request.resource.data.email is string)
+                    && (!('profilePicture' in request.resource.data) || request.resource.data.profilePicture is string)
+                    && (!('preferences' in request.resource.data) || request.resource.data.preferences is map)
+                    && resource.data.role == request.resource.data.get('role', resource.data.role);
+      
+      allow delete: if isAdmin();
+    }
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

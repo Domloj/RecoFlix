@@ -1,0 +1,19 @@
+.noticePanel {
+  padding: 20px 24px;
+  background: rgba(15, 23, 42, 0.88);
+  border-color: rgba(148, 163, 184, 0.16);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.24);
+}
+
+.noticeGroup {
+  gap: 16px;
+}
+
+.noticeIcon {
+  color: #38bdf8;
+  flex-shrink: 0;
+}
+
+.noticeTitle {
+  color: #f8fafc;
+}

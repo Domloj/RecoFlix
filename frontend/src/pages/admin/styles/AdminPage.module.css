@@ -1,0 +1,17 @@
+.adminPage {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.panel {
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .panel,
+  .noticePanel,
+  .statsGrid {
+    padding: 18px;
+  }
+}
