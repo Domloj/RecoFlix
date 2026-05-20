@@ -1,6 +1,10 @@
-import { Card, Image, Text, Group, Badge } from '@mantine/core';
-import type { MovieListItem } from '../../interfaces/movies';
+import { Card, Image, Text, Group, Badge, ActionIcon } from '@mantine/core';
+import { IconThumbUp, IconThumbDown } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import type { MovieListItem, MovieInteractionState } from '../../interfaces/movies';
 import classes from './styles/MovieCard.module.css';
+import { useAuth } from '../../context/AuthContext';
+import { getMovieStatus, toggleLike, toggleDislike } from '../../services/userLikesService';
 
 interface MovieCardProps {
   movie: MovieListItem;
@@ -8,8 +12,60 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, onClick }: MovieCardProps) {
+  const { user } = useAuth();
+  const [interaction, setInteraction] = useState<MovieInteractionState>({ liked: false, disliked: false, isLoading: false });
+
   const handleActivate = () => {
     onClick?.(movie);
+  };
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      if (!user) return;
+      setInteraction((s) => ({ ...s, isLoading: true }));
+      try {
+        const status = await getMovieStatus(user.uid, movie.id);
+        if (!mounted) return;
+        setInteraction({ liked: status.liked, disliked: status.disliked, isLoading: false });
+      } catch (err) {
+        if (!mounted) return;
+        setInteraction((s) => ({ ...s, isLoading: false }));
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [user, movie.id]);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+    // optimistic update
+    setInteraction((s) => ({ ...s, isLoading: true, liked: !s.liked, disliked: s.liked ? s.disliked : false }));
+    try {
+      await toggleLike(user.uid, movie.id);
+    } catch (err) {
+      const status = await getMovieStatus(user.uid, movie.id);
+      setInteraction({ liked: status.liked, disliked: status.disliked, isLoading: false });
+      return;
+    }
+    setInteraction((s) => ({ ...s, isLoading: false }));
+  };
+
+  const handleDislike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+    setInteraction((s) => ({ ...s, isLoading: true, disliked: !s.disliked, liked: s.disliked ? s.liked : false }));
+    try {
+      await toggleDislike(user.uid, movie.id);
+    } catch (err) {
+      const status = await getMovieStatus(user.uid, movie.id);
+      setInteraction({ liked: status.liked, disliked: status.disliked, isLoading: false });
+      return;
+    }
+    setInteraction((s) => ({ ...s, isLoading: false }));
   };
 
   return (
@@ -42,6 +98,32 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
       <Text size="sm" c="dimmed" className={classes.description}>
         {movie.description}
       </Text>
+
+      <div className={classes.actions}>
+        <ActionIcon
+          onClick={handleLike}
+          variant={interaction.liked ? 'filled' : 'outline'}
+          color="green"
+          size="lg"
+          disabled={interaction.isLoading || !user}
+          title={user ? (interaction.liked ? 'Usuń polubienie' : 'Polub') : 'Zaloguj się, aby ocenić'}
+          aria-pressed={interaction.liked}
+        >
+          <IconThumbUp />
+        </ActionIcon>
+
+        <ActionIcon
+          onClick={handleDislike}
+          variant={interaction.disliked ? 'filled' : 'outline'}
+          color="red"
+          size="lg"
+          disabled={interaction.isLoading || !user}
+          title={user ? (interaction.disliked ? 'Usuń niechęć' : 'Nie podoba się') : 'Zaloguj się, aby ocenić'}
+          aria-pressed={interaction.disliked}
+        >
+          <IconThumbDown />
+        </ActionIcon>
+      </div>
     </Card>
   );
 }
