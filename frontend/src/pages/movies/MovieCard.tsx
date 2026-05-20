@@ -1,6 +1,7 @@
 import { Card, Image, Text, Group, Badge, ActionIcon } from '@mantine/core';
 import { IconThumbUp, IconThumbDown } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
 import type { MovieListItem, MovieInteractionState } from '../../interfaces/movies';
 import classes from './styles/MovieCard.module.css';
 import { useAuth } from '../../context/AuthContext';
@@ -39,7 +40,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
     };
   }, [user, movie.id]);
 
-  const handleLike = async (e: React.MouseEvent) => {
+  const handleLike = async (e: MouseEvent) => {
     e.stopPropagation();
     if (!user) return;
     // optimistic update
@@ -54,7 +55,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
     setInteraction((s) => ({ ...s, isLoading: false }));
   };
 
-  const handleDislike = async (e: React.MouseEvent) => {
+  const handleDislike = async (e: MouseEvent) => {
     e.stopPropagation();
     if (!user) return;
     setInteraction((s) => ({ ...s, isLoading: true, disliked: !s.disliked, liked: s.disliked ? s.liked : false }));
