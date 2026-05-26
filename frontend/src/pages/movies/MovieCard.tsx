@@ -79,6 +79,9 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
       role="button"
       tabIndex={0}
       onKeyDown={(event) => {
+        if (event.currentTarget !== event.target) {
+          return;
+        }
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           handleActivate();
