@@ -1,7 +1,7 @@
 import { Card, Image, Text, Group, Badge, ActionIcon } from '@mantine/core';
 import { IconThumbUp, IconThumbDown } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import type { MouseEvent } from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
 import type { MovieListItem, MovieInteractionState } from '../../interfaces/movies';
 import classes from './styles/MovieCard.module.css';
 import { useAuth } from '../../context/AuthContext';
@@ -18,6 +18,18 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
 
   const handleActivate = () => {
     onClick?.(movie);
+  };
+
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // ignoruj eventy z child elementów (ActionIcon itd.)
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleActivate();
+    }
   };
 
   useEffect(() => {
@@ -78,15 +90,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
       onClick={handleActivate}
       role="button"
       tabIndex={0}
-      onKeyDown={(event) => {
-        if (event.currentTarget !== event.target) {
-          return;
-        }
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          handleActivate();
-        }
-      }}
+      onKeyDown={handleCardKeyDown}
     >
       <Card.Section className={classes.posterSection}>
         <Image src={movie.poster_url} alt={movie.title} height={260} fit="cover" />
