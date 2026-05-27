@@ -44,6 +44,8 @@ venv
 *.model
 backend/models/
 .ipynb_checkpoints/
+notebooks/overviews_cache.json
+notebooks/embeddings_minilm.npy
 
 # =========================
 # Pliki systemowe i konfiguracyjne IDE
