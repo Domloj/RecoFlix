@@ -117,34 +117,29 @@ export function RecoPage() {
 
               {/* Sekcja XAI */}
               <Paper className={classes.xaiBox} p="sm" radius="sm">
-                <Text size="xs" fw={600} c="dimmed" mb={6} tt="uppercase" lts={0.5}>
+                <Text size="xs" fw={600} c="dimmed" mb={8} tt="uppercase" lts={0.5}>
                   Dlaczego ten film?
                 </Text>
 
-                <Group gap={6} mb={6}>
-                  <Badge size="xs" color="cyan" variant="light">Treść</Badge>
-                  <Badge size="xs" color="violet" variant="light">Społeczność</Badge>
+                <Progress.Root size="sm" radius="xl" mb={8}>
+                  <Progress.Section
+                    value={rec.xai.content_contribution_pct}
+                    color="cyan"
+                  />
+                  <Progress.Section
+                    value={rec.xai.collaborative_contribution_pct}
+                    color="violet"
+                  />
+                </Progress.Root>
+
+                <Group gap={6} mb={8} justify="space-between">
+                  <Badge size="xs" color="cyan" variant="light">
+                    Treść {rec.xai.content_contribution_pct.toFixed(0)}%
+                  </Badge>
+                  <Badge size="xs" color="violet" variant="light">
+                    Społeczność {rec.xai.collaborative_contribution_pct.toFixed(0)}%
+                  </Badge>
                 </Group>
-
-                <Group gap={6} mb={6} justify="space-between">
-                    <Badge size="xs" color="cyan" variant="light">
-                        Treść {rec.xai.content_contribution_pct.toFixed(0)}%
-                    </Badge>
-                    <Badge size="xs" color="violet" variant="light">
-                        Społeczność {rec.xai.collaborative_contribution_pct.toFixed(0)}%
-                    </Badge>
-                    </Group>
-
-                    <Progress.Root size="sm" radius="xl" mb={8}>
-                    <Progress.Section
-                        value={rec.xai.content_contribution_pct}
-                        color="cyan"
-                    />
-                    <Progress.Section
-                        value={rec.xai.collaborative_contribution_pct}
-                        color="violet"
-                    />
-                    </Progress.Root>
 
                 <Text size="xs" c="dimmed" lh={1.5}>
                   {rec.xai.human_explanation}
