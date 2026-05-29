@@ -25,6 +25,7 @@ __pycache__/
 .pytest_cache/
 .venv
 venv
+backend/.recoflixvenv/
 
 # =========================
 # Pliki środowiskowe i sekrety
@@ -47,6 +48,7 @@ backend/models/
 notebooks/overviews_cache.json
 notebooks/embeddings_minilm.npy
 
+
 # =========================
 # Pliki systemowe i konfiguracyjne IDE
 # =========================
@@ -61,3 +63,4 @@ Thumbs.db
 # =========================
 ml-100k/
 tmdb_cache.json
+ml-25m/

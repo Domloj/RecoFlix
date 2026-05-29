@@ -16,7 +16,10 @@ logging.basicConfig(
 
 load_dotenv()
 
-client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = AsyncOpenAI(
+    api_key=os.environ.get("GEMINI_API_KEY"),
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+)
 
 try:
     with MOVIES_DB_PATH.open("r", encoding="utf-8") as f:
@@ -75,14 +78,12 @@ Moje pytanie: {user_prompt}
     try:
         logging.info("Wysyłanie zapytania rekomendacji do OpenAI (z ograniczonym kontekstem)...")
         response = await client.chat.completions.create(
-            model="gpt-5.1", 
+            model="gemini-2.0-flash",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content}
             ],
             temperature=0.7,
-            prompt_cache_key="recoflix_movielens_db",
-            prompt_cache_retention="24h"
         )
         
         raw_output = response.choices[0].message.content
@@ -116,8 +117,8 @@ async def check_guardrail(user_prompt: str) -> GuardrailResult:
     try:
         logging.info("Wysyłanie zapytania Guardrail do OpenAI...")
         response = await client.chat.completions.create(
-            model="gpt-4o-mini",
-            response_format={ "type": "json_object" }, 
+            model="gemini-2.0-flash",
+            response_format={ "type": "json_object" },
             messages=[
                 {"role": "system", "content": guardrail_system_prompt},
                 {"role": "user", "content": user_prompt}
