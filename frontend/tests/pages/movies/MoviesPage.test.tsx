@@ -12,6 +12,12 @@ vi.mock('../../../src/services/moviesService', () => ({
   fetchMoviesPage: vi.fn(),
 }));
 
+vi.mock('../../../src/config/firebase', () => ({
+  auth: { currentUser: null },
+  db: {},
+  app: {},
+}));
+
 if (!window.matchMedia) {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
