@@ -148,12 +148,11 @@ class HybridRecommender:
         hybrid_scores = alpha * cb_agg + (1 - alpha) * cf_agg
 
         # Wyklucz filmy, które użytkownik już polubił
-        for idx in liked_indices:
-            hybrid_scores[idx] = 0.0
+        for idx in set(liked_indices):
+            hybrid_scores[idx] = -1.0
 
-        sim_scores = sorted(enumerate(hybrid_scores), key=lambda x: x[1], reverse=True)
-        top_movies = sim_scores[:top_n]
-
+        sim_scores = [(i, s) for i, s in enumerate(hybrid_scores) if s > 0]
+        top_movies = sorted(sim_scores, key=lambda x: x[1], reverse=True)[:top_n]
         results = []
         for i, score in top_movies:
             contrib_cb = alpha * cb_agg[i]
