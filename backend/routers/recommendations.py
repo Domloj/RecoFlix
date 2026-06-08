@@ -31,3 +31,14 @@ async def get_recommendations(target_movie: str, alpha: float = 0.5, user: dict 
         raise HTTPException(status_code=404, detail=f"Film o tytule zawierającym '{target_movie}' nie został znaleziony w bazie.")
         
     return results
+
+@router.post("/for-user", response_model=list[MovieRecommendation])
+async def get_recommendations_for_user(
+    liked_movie_ids: list[int],
+    alpha: float = 0.5,
+    user: dict = Depends(get_current_user)
+):
+    results = recommender.get_recommendations_for_user(liked_movie_ids, alpha=alpha, top_n=10)
+    if results is None:
+        raise HTTPException(status_code=404, detail="Brak wystarczających danych do rekomendacji.")
+    return results

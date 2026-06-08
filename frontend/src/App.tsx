@@ -11,6 +11,7 @@ import { MoviesPage } from './pages/movies/MoviesPage';
 import { PublicRoute } from './components/PublicRoute';
 import classes from './App.module.css';
 import { ChatWidget } from './components/ChatWidget';
+import { RecoPage } from './pages/reco/RecoPage';
 
 function App() {
   return (
@@ -62,6 +63,14 @@ function App() {
                 } 
               />
               <Route path="*" element={<Navigate to="/" replace />} />
+              <Route
+                path="/reco"
+                element={
+                  <ProtectedRoute>
+                    <RecoPage />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </main>
         </div>

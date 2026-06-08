@@ -119,4 +119,72 @@ class HybridRecommender:
             })
         return results
 
+    def get_recommendations_for_user(self, liked_movie_ids: list[int], alpha: float = 0.5, top_n: int = 10):
+        if not self.is_ready:
+            raise ValueError("Silnik nie został jeszcze zainicjalizowany.")
+
+        # Mapuj liked_movie_ids → indeksy w self.movies (silnik operuje na indeksach DataFrame)
+        liked_indices = []
+        for movie_id in liked_movie_ids:
+            rows = self.movies[self.movies['movieId'] == movie_id]
+            if not rows.empty:
+                liked_indices.append(rows.index[0])
+
+        if not liked_indices:
+            return None
+
+        # Zsumuj i uśrednij hybrid_scores ze wszystkich polubionych filmów
+        import numpy as np
+        cb_agg = np.zeros(len(self.movies))
+        cf_agg = np.zeros(len(self.movies))
+
+        for idx in liked_indices:
+            cb_agg += self.cosine_sim_cb[idx]
+            cf_agg += self.cosine_sim_cf[idx]
+
+        cb_agg /= len(liked_indices)
+        cf_agg /= len(liked_indices)
+
+        hybrid_scores = alpha * cb_agg + (1 - alpha) * cf_agg
+
+        # Wyklucz filmy, które użytkownik już polubił
+        for idx in set(liked_indices):
+            hybrid_scores[idx] = -1.0
+
+        sim_scores = [(i, s) for i, s in enumerate(hybrid_scores) if s > 0]
+        top_movies = sorted(sim_scores, key=lambda x: x[1], reverse=True)[:top_n]
+        results = []
+        for i, score in top_movies:
+            contrib_cb = alpha * cb_agg[i]
+            contrib_cf = (1 - alpha) * cf_agg[i]
+            total_contrib = contrib_cb + contrib_cf
+
+            pct_cb = (contrib_cb / total_contrib * 100) if total_contrib > 0 else 0
+            pct_cf = (contrib_cf / total_contrib * 100) if total_contrib > 0 else 0
+
+            if pct_cb > 60:
+                explanation = "Pasuje gatunkowo i klimatem do filmów, które polubiłaś."
+            elif pct_cf > 60:
+                explanation = "Hit wśród widzów o podobnym guście do Twojego."
+            else:
+                explanation = "Zrównoważony wybór — pasuje zarówno stylem, jak i gustami podobnych widzów."
+
+            movie_id = self.movies['movieId'].iloc[i]
+            tmdb_id_row = self.links[self.links['movieId'] == movie_id]
+            tmdb_id = tmdb_id_row['tmdbId'].values[0] if not tmdb_id_row.empty else None
+
+            results.append({
+                "movie_id": int(movie_id),
+                "title": str(self.movies['title'].iloc[i]),
+                "poster_url": self._fetch_poster_url(tmdb_id),
+                "score": float(score),
+                "xai": {
+                    "content_contribution_pct": float(pct_cb),
+                    "collaborative_contribution_pct": float(pct_cf),
+                    "human_explanation": explanation
+                }
+            })
+
+        return results
+
 recommender = HybridRecommender()
