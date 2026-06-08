@@ -15,8 +15,7 @@ export interface MovieRecommendation {
 }
 
 export const fetchRecommendationsForUser = async (
-  likedMovieIds: number[],
-  alpha: number = 0.5
+  likedMovieIds: number[]
 ): Promise<MovieRecommendation[]> => {
   return fetchWithAuth('/recommendations/for-user', {
     method: 'POST',
