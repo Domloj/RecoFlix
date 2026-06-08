@@ -12,6 +12,12 @@ const renderWithProviders = (ui: ReactNode) => {
   return render(<MantineProvider>{ui}</MantineProvider>);
 };
 
+vi.mock('../../../src/config/firebase', () => ({
+  auth: { currentUser: null },
+  db: {},
+  app: {},
+}));
+
 describe('MovieCard', () => {
   const mockMovie: MovieListItem = {
     id: 42,
