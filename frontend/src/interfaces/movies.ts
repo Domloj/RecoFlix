@@ -12,3 +12,14 @@ export interface MoviesPageResponse {
   page_size: number;
   total: number;
 }
+
+export interface UserMovieLists {
+  liked_movie_ids?: number[];
+  disliked_movie_ids?: number[];
+}
+
+export interface MovieInteractionState {
+  liked: boolean;
+  disliked: boolean;
+  isLoading: boolean;
+}
