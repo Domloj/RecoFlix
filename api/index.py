@@ -20,7 +20,10 @@ from constants import FRONTEND_URL_DEFAULT, SERVICE_ACCOUNT_PATH
 load_dotenv()
 frontend_url = os.getenv("FRONTEND_URL", FRONTEND_URL_DEFAULT)
 
-recommender.initialize()
+try:
+    recommender.initialize()
+except FileNotFoundError:
+    print("Uwaga: Brak pliku bazy filmów. Pomijam inicjalizację silnika (Środowisko testowe/CI).")
 
 app = FastAPI()
 
