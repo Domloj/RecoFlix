@@ -125,7 +125,7 @@ def test_movies_route_calls_service():
     with patch("firebase_admin.credentials.Certificate"), patch(
         "firebase_admin.initialize_app"
     ):
-        from main import app
+        from index import app
         from dependencies import get_current_user
 
     sample_payload = {

@@ -1,5 +1,11 @@
-from contextlib import asynccontextmanager
-from dependencies import get_current_user
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+import json
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
@@ -7,22 +13,31 @@ from firebase_admin import credentials
 from routers import chat, recommendations, movies
 from routers import admin
 from services.recommender_engine import recommender
-import os
+from dependencies import get_current_user
 from dotenv import load_dotenv
 from constants import FRONTEND_URL_DEFAULT, SERVICE_ACCOUNT_PATH
 
 load_dotenv()
 frontend_url = os.getenv("FRONTEND_URL", FRONTEND_URL_DEFAULT)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+try:
     recommender.initialize()
-    yield
+except FileNotFoundError:
+    print("Uwaga: Brak pliku bazy filmów. Pomijam inicjalizację silnika (Środowisko testowe/CI).")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
-cred = credentials.Certificate(str(SERVICE_ACCOUNT_PATH))
-firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    firebase_cert_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+    
+    if firebase_cert_json:
+        cert_dict = json.loads(firebase_cert_json)
+        cred = credentials.Certificate(cert_dict)
+    else:
+        from constants import SERVICE_ACCOUNT_PATH
+        cred = credentials.Certificate(str(SERVICE_ACCOUNT_PATH))
+        
+    firebase_admin.initialize_app(cred)
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,4 +59,3 @@ async def get_status(user: dict = Depends(get_current_user)):
         "database": "MovieLens-100k",
         "user_uid": user["uid"]
     }
-    
