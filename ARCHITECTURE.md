@@ -13,7 +13,7 @@ RecoFlix is an intelligent movie recommendation web application featuring an Exp
 - **Database:** MovieLens 100k dataset (`movies.csv`, `ratings.csv`, `links.csv`). Firebase Auth for users.
 
 ## 3. Folder Structure (Overview)
-- `/backend` - Server logic, FastAPI endpoints, AI routers, and Recommender Engine (`recommender_engine.py`).
+- `/api` - Server logic, FastAPI endpoints, AI routers, and Recommender Engine (`recommender_engine.py`).
 - `/data` - Stores datasets (MovieLens 100k CSV files).
 - `/frontend` - React client application, strictly separated into `/components`, `/interfaces`, and `/services` with isolated `.css` files.
 - `/notebooks` - Jupyter Notebooks for safe ML experimentation (Embeddings, SHAP, RMSE evaluation) before moving to production.

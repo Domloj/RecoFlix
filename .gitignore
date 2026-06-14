@@ -12,14 +12,14 @@ yarn-error.log*
 # =========================
 # Zależności Backendowe (Python/FastAPI)
 # =========================
-backend/.venv/
-backend/venv/
-backend/env/
-backend/__pycache__/
-backend/*.py[cod]
-backend/*$py.class
-backend/.pytest_cache/
-backend/serviceAccountKey.json
+api/.venv/
+api/venv/
+api/env/
+api/__pycache__/
+api/*.py[cod]
+api/*$py.class
+api/.pytest_cache/
+api/serviceAccountKey.json
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -42,7 +42,7 @@ venv
 *.pkl
 *.h5
 *.model
-backend/models/
+api/models/
 .ipynb_checkpoints/
 notebooks/overviews_cache.json
 notebooks/embeddings_minilm.npy
@@ -61,3 +61,4 @@ Thumbs.db
 # =========================
 ml-100k/
 tmdb_cache.json
+.vercel

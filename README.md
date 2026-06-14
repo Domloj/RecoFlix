@@ -15,7 +15,7 @@ RecoFlix to nowoczesna aplikacja webowa integrująca inteligentny silnik rekomen
 ⚠️ **Ważne:** Zanim zaczniesz, upewnij się, że posiadasz prywatny klucz dostępu do Firebase (`serviceAccountKey.json`) i umieściłeś go w folderze `backend/`.
 
 ```bash
-cd backend
+cd api
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
@@ -47,6 +47,6 @@ npx vitest
 
 **Testy Backendu (FastAPI):**
 ```bash
-cd backend
+cd api
 pytest -v
 ```

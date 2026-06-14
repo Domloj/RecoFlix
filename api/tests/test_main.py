@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 with patch("firebase_admin.credentials.Certificate"), \
      patch("firebase_admin.initialize_app"):
-    from main import app, get_current_user
+    from api.index import app, get_current_user
 
 client = TestClient(app)
 
