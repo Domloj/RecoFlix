@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 
 def _make_client(recommender_mock):
     with patch("firebase_admin.credentials.Certificate"), patch("firebase_admin.initialize_app"):
-        from api.index import app
+        from index import app
         from dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: {"uid": "user-1"}
@@ -61,7 +61,7 @@ def not_found_recommender():
 
 def test_get_recommendations_returns_valid_structure(ready_recommender):
     with patch("firebase_admin.credentials.Certificate"), patch("firebase_admin.initialize_app"):
-        from api.index import app
+        from index import app
         from dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: {"uid": "user-1"}
@@ -91,7 +91,7 @@ def test_get_recommendations_returns_valid_structure(ready_recommender):
 
 def test_get_recommendations_xai_percentages_sum_to_100(ready_recommender):
     with patch("firebase_admin.credentials.Certificate"), patch("firebase_admin.initialize_app"):
-        from api.index import app
+        from index import app
         from dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: {"uid": "user-1"}
@@ -109,7 +109,7 @@ def test_get_recommendations_xai_percentages_sum_to_100(ready_recommender):
 
 def test_get_recommendations_returns_404_for_unknown_movie(not_found_recommender):
     with patch("firebase_admin.credentials.Certificate"), patch("firebase_admin.initialize_app"):
-        from api.index import app
+        from index import app
         from dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: {"uid": "user-1"}
@@ -127,7 +127,7 @@ def test_get_recommendations_returns_404_for_unknown_movie(not_found_recommender
 def test_get_recommendations_handles_malicious_regex_input(ready_recommender):
     """Weryfikuje że złośliwy input (ReDoS) nie powoduje błędu 500."""
     with patch("firebase_admin.credentials.Certificate"), patch("firebase_admin.initialize_app"):
-        from api.index import app
+        from index import app
         from dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: {"uid": "user-1"}
@@ -146,7 +146,7 @@ def test_get_recommendations_handles_malicious_regex_input(ready_recommender):
 
 def test_get_recommendations_passes_alpha_to_engine(ready_recommender):
     with patch("firebase_admin.credentials.Certificate"), patch("firebase_admin.initialize_app"):
-        from api.index import app
+        from index import app
         from dependencies import get_current_user
 
     app.dependency_overrides[get_current_user] = lambda: {"uid": "user-1"}
@@ -162,7 +162,7 @@ def test_get_recommendations_passes_alpha_to_engine(ready_recommender):
 
 def test_get_recommendations_requires_auth():
     with patch("firebase_admin.credentials.Certificate"), patch("firebase_admin.initialize_app"):
-        from api.index import app
+        from index import app
 
     app.dependency_overrides = {}
 

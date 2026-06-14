@@ -51,7 +51,7 @@ class _FakeFirestoreClient:
 
 def _build_app():
     with patch('firebase_admin.credentials.Certificate'), patch('firebase_admin.initialize_app'):
-        from api.index import app
+        from index import app
         from dependencies import get_current_user
 
     return app, get_current_user
