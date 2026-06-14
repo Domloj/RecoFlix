@@ -6,6 +6,7 @@ RecoFlix to nowoczesna aplikacja webowa integrująca inteligentny silnik rekomen
 * **Frontend:** React (Vite), TypeScript, Mantine UI, Vitest
 * **Backend:** Python, FastAPI, Pytest
 * **Chmura / Auth:** Firebase
+* [Vercel](https://recoflix.vercel.app/)
 
 ---
 
