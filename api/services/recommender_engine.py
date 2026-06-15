@@ -4,6 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import logging
 import os
 import requests
+import numpy as np
 
 from constants import (
     DEFAULT_POSTER_URL,
@@ -40,7 +41,9 @@ class HybridRecommender:
         # Macierz Collaborative Filtering
         user_item_matrix = ratings.pivot(index='movieId', columns='userId', values='rating').fillna(0)
         user_item_matrix = user_item_matrix.reindex(self.movies['movieId'], fill_value=0)
-        self.cosine_sim_cf = cosine_similarity(user_item_matrix)
+        user_item_matrix_32 = user_item_matrix.astype(np.float32)
+
+        self.cosine_sim_cf = cosine_similarity(user_item_matrix_32)
 
         self.is_ready = True
         logging.info("Silnik rekomendacji hybrydowych gotowy do pracy!")

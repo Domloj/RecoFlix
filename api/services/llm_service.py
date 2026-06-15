@@ -4,6 +4,7 @@ import logging
 import traceback
 import random
 from openai import AsyncOpenAI
+from pinecone import Pinecone
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from constants import MOVIES_DB_PATH
@@ -18,14 +19,33 @@ load_dotenv()
 
 client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+# Inicjalizacja klienta Pinecone
+PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
+PINECONE_INDEX_NAME = os.environ.get("PINECONE_INDEX_NAME", "recoflix-movies")
+
+if PINECONE_API_KEY:
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    pinecone_index = pc.Index(PINECONE_INDEX_NAME)
+else:
+    pinecone_index = None
+
 try:
     with MOVIES_DB_PATH.open("r", encoding="utf-8") as f:
         FULL_MOVIES_DB = json.load(f)
     logging.info(f"Pomyślnie załadowano bazę {len(FULL_MOVIES_DB)} filmów do pamięci.")
+    
+    MOVIES_BY_ID_MAP = {str(m.get("id")): m for m in FULL_MOVIES_DB}
+    
+    if pinecone_index is not None:
+        logging.info("Pomyślnie zaincjalizowano klienta bazy Pinecone.")
+    else:
+        logging.warning("Brak klucza PINECONE_API_KEY. Zostanie użyte fallbackowe losowanie.")
+        
 except Exception as e:
-    logging.error("KRYTYCZNY BŁĄD: Nie można załadować pliku movies_database.json!")
+    logging.error("KRYTYCZNY BŁĄD: Nie można załadować plików bazy!")
     logging.error(traceback.format_exc())
     FULL_MOVIES_DB = []
+    MOVIES_BY_ID_MAP = {}
 
 class GuardrailResult(BaseModel):
     flagged: bool
@@ -43,14 +63,42 @@ async def generate_movie_recommendation(user_prompt: str, user_history: list[str
     if guardrail_result.flagged and guardrail_result.confidence > 0.7:
         return "Przepraszam, ale jako asystent RecoFlix specjalizuję się wyłącznie w filmach i kinie. O czym filmowym chciałbyś porozmawiać?"
 
-    # TYMCZASOWY SYSTEM REKOMENDACJI (Zanim powstanie model ML)
-    # Wybieramy tylko 50 losowych filmów z 10 000, żeby nie zabić API OpenAI
-    if len(FULL_MOVIES_DB) > 50:
-        sampled_movies = random.sample(FULL_MOVIES_DB, 50)
-    else:
-        sampled_movies = FULL_MOVIES_DB
+    try:
+        if pinecone_index is not None:
+            logging.info("Generowanie osadzenia dla zapytania: RAG (Pinecone)...")
+            history_text = " ".join(user_history) if user_history else ""
+            search_query = f"Szukam filmu: {user_prompt}. Podobne do: {history_text}"
+            
+            embed_response = await client.embeddings.create(
+                input=search_query,
+                model="text-embedding-3-small"
+            )
+            query_embedding = embed_response.data[0].embedding
+            
+            pinecone_res = pinecone_index.query(
+                vector=query_embedding,
+                top_k=50,
+                include_metadata=False
+            )
+            
+            match_ids = [match.id for match in pinecone_res.matches]
+            sampled_movies = [MOVIES_BY_ID_MAP[mid] for mid in match_ids if mid in MOVIES_BY_ID_MAP]
+            
+            selected_titles = [m.get("title", "Brak tytułu") for m in sampled_movies]
+            logging.info(f"Odnaleziono {len(sampled_movies)} podobnych filmów przy użyciu Pinecone RAG. Tytuły: {selected_titles}")
+        else:
+            logging.warning("Używam losowego fallbacku, ponieważ wektory osadzeń są niedostępne.")
+            if len(FULL_MOVIES_DB) > 50:
+                sampled_movies = random.sample(FULL_MOVIES_DB, 50)
+            else:
+                sampled_movies = FULL_MOVIES_DB
+    except Exception as e:
+        logging.error(f"Błąd podczas szukania podobnych filmów (RAG): {e}. Fallback do losowania.")
+        if len(FULL_MOVIES_DB) > 50:
+            sampled_movies = random.sample(FULL_MOVIES_DB, 50)
+        else:
+            sampled_movies = FULL_MOVIES_DB
         
-    # Zamieniamy tylko te 50 filmów na tekst dla LLM
     context_movies_str = json.dumps(sampled_movies, ensure_ascii=False)
         
     system_prompt = f"""
