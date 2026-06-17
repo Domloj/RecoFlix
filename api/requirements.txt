@@ -10,3 +10,4 @@ httpx
 pandas
 scikit-learn
 numpy
+pinecone
