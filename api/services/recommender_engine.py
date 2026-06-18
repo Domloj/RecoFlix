@@ -52,7 +52,7 @@ class HybridRecommender:
         self.movies["overview"] = self._load_overviews()
         self.movies["text"] = self.movies.apply(self._build_text, axis=1)
 
-        # Macierz Content-Based — embeddingi
+        # Macierz Content-Based - embeddingi
         self.cosine_sim_cb = self._build_cb_matrix()
 
         # Macierz Collaborative Filtering
@@ -66,7 +66,7 @@ class HybridRecommender:
     def _load_overviews(self) -> pd.Series:
         """Wczytuje opisy fabuły z lokalnego cache TMDB."""
         if not OVERVIEWS_CACHE_PATH.exists():
-            logging.warning("Brak overviews_cache.json — CB będzie oparte wyłącznie na gatunkach.")
+            logging.warning("Brak overviews_cache.json - CB będzie oparte wyłącznie na gatunkach.")
             return pd.Series([None] * len(self.movies))
 
         with OVERVIEWS_CACHE_PATH.open("r", encoding="utf-8") as f:
@@ -91,7 +91,7 @@ class HybridRecommender:
         return " ".join(parts)
 
     def _build_cb_matrix(self) -> np.ndarray:
-        """Buduje macierz CB z embeddingów — z cache lub od nowa."""
+        """Buduje macierz CB z embeddingów - z cache lub od nowa."""
         if EMBEDDINGS_PATH.exists():
             logging.info("Wczytano embeddingi z cache.")
             embeddings = np.load(EMBEDDINGS_PATH)
@@ -113,7 +113,7 @@ class HybridRecommender:
     def _get_shap_explanation(self, base_idx: int, rec_idx: int, alpha: float) -> str:
         """
         Wyjaśnienie oparte na bezpośredniej analizie cech.
-        Szybkie i deterministyczne — bez narzutu SHAP na produkcji.
+        Szybkie i deterministyczne - bez narzutu SHAP na produkcji.
         """
         try:
             base_genres = set(self.movies["genres"].iloc[base_idx].split("|"))
@@ -128,19 +128,19 @@ class HybridRecommender:
             if cf_score > cb_score * 1.5:
                 return "Wysoko oceniany przez widzów o bardzo podobnym guście do Twojego."
 
-            # Dominuje CB — mamy wspólne gatunki
+            # Dominuje CB - mamy wspólne gatunki
             if common_genres:
                 top_genre = sorted(common_genres)[0]
                 if len(common_genres) >= 3:
-                    return f"Bardzo zbliżony klimatem — łączy go z polubionym filmem aż {len(common_genres)} wspólnych gatunków, w tym '{top_genre}'."
+                    return f"Bardzo zbliżony klimatem - łączy go z polubionym filmem aż {len(common_genres)} wspólnych gatunków, w tym '{top_genre}'."
                 return f"Gatunek '{top_genre}' najbardziej zbliża ten film do Twoich ulubionych."
 
-            # CB dominuje ale brak wspólnych gatunków — podobieństwo fabularne z embeddingów
+            # CB dominuje ale brak wspólnych gatunków - podobieństwo fabularne z embeddingów
             if cb_score > 0.5:
                 return "Bardzo podobna fabuła i klimat do filmów, które polubiłaś."
 
             # Wyrównany wynik
-            return "Zrównoważony wybór — pasuje zarówno klimatem, jak i gustami podobnych widzów."
+            return "Zrównoważony wybór - pasuje zarówno klimatem, jak i gustami podobnych widzów."
 
         except Exception as e:
             logging.warning(f"Błąd generowania wyjaśnienia: {e}")
@@ -152,7 +152,7 @@ class HybridRecommender:
             return "Pasuje gatunkowo i klimatem do filmów, które polubiłaś."
         if pct_cf > 60:
             return "Hit wśród widzów o podobnym guście do Twojego."
-        return "Zrównoważony wybór — pasuje zarówno stylem, jak i gustami podobnych widzów."
+        return "Zrównoważony wybór - pasuje zarówno stylem, jak i gustami podobnych widzów."
 
     def get_recommendations(self, target_title: str, alpha: float = 0.5, top_n: int = 5):
         """Rekomendacje dla pojedynczego tytułu (endpoint GET /api/recommendations/)."""
