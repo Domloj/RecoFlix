@@ -9,13 +9,9 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 from constants import MOVIES_DB_PATH
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
 load_dotenv()
+
+logger = logging.getLogger("recoflix_api")
 
 client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
@@ -32,18 +28,18 @@ else:
 try:
     with MOVIES_DB_PATH.open("r", encoding="utf-8") as f:
         FULL_MOVIES_DB = json.load(f)
-    logging.info(f"Pomyślnie załadowano bazę {len(FULL_MOVIES_DB)} filmów do pamięci.")
+    logger.info(f"Pomyślnie załadowano bazę {len(FULL_MOVIES_DB)} filmów do pamięci.")
     
     MOVIES_BY_ID_MAP = {str(m.get("id")): m for m in FULL_MOVIES_DB}
     
     if pinecone_index is not None:
-        logging.info("Pomyślnie zaincjalizowano klienta bazy Pinecone.")
+        logger.info("Pomyślnie zaincjalizowano klienta bazy Pinecone.")
     else:
-        logging.warning("Brak klucza PINECONE_API_KEY. Zostanie użyte fallbackowe losowanie.")
+        logger.warning("Brak klucza PINECONE_API_KEY. Zostanie użyte fallbackowe losowanie.")
         
 except Exception as e:
-    logging.error("KRYTYCZNY BŁĄD: Nie można załadować plików bazy!")
-    logging.error(traceback.format_exc())
+    logger.error("KRYTYCZNY BŁĄD: Nie można załadować plików bazy!")
+    logger.error(traceback.format_exc())
     FULL_MOVIES_DB = []
     MOVIES_BY_ID_MAP = {}
 
@@ -53,7 +49,7 @@ class GuardrailResult(BaseModel):
     reason: str
 
 async def generate_movie_recommendation(user_prompt: str, user_history: list[str]) -> str:
-    logging.info(f"Otrzymano zapytanie użytkownika: '{user_prompt}'")
+    logger.info(f"Otrzymano zapytanie użytkownika: '{user_prompt}'")
     
     guardrail_result = await check_guardrail(user_prompt)
     
@@ -65,7 +61,7 @@ async def generate_movie_recommendation(user_prompt: str, user_history: list[str
 
     try:
         if pinecone_index is not None:
-            logging.info("Generowanie osadzenia dla zapytania: RAG (Pinecone)...")
+            logger.info("Generowanie osadzenia dla zapytania: RAG (Pinecone)...")
             history_text = " ".join(user_history) if user_history else ""
             search_query = f"Szukam filmu: {user_prompt}. Podobne do: {history_text}"
             
@@ -85,15 +81,15 @@ async def generate_movie_recommendation(user_prompt: str, user_history: list[str
             sampled_movies = [MOVIES_BY_ID_MAP[mid] for mid in match_ids if mid in MOVIES_BY_ID_MAP]
             
             selected_titles = [m.get("title", "Brak tytułu") for m in sampled_movies]
-            logging.info(f"Odnaleziono {len(sampled_movies)} podobnych filmów przy użyciu Pinecone RAG. Tytuły: {selected_titles}")
+            logger.info(f"Odnaleziono {len(sampled_movies)} podobnych filmów przy użyciu Pinecone RAG. Tytuły: {selected_titles}")
         else:
-            logging.warning("Używam losowego fallbacku, ponieważ wektory osadzeń są niedostępne.")
+            logger.warning("Używam losowego fallbacku, ponieważ wektory osadzeń są niedostępne.")
             if len(FULL_MOVIES_DB) > 50:
                 sampled_movies = random.sample(FULL_MOVIES_DB, 50)
             else:
                 sampled_movies = FULL_MOVIES_DB
     except Exception as e:
-        logging.error(f"Błąd podczas szukania podobnych filmów (RAG): {e}. Fallback do losowania.")
+        logger.error(f"Błąd podczas szukania podobnych filmów (RAG): {e}. Fallback do losowania.")
         if len(FULL_MOVIES_DB) > 50:
             sampled_movies = random.sample(FULL_MOVIES_DB, 50)
         else:
@@ -121,7 +117,7 @@ Moja historia polubionych filmów: {user_history}
 Moje pytanie: {user_prompt}
 """
     try:
-        logging.info("Wysyłanie zapytania rekomendacji do OpenAI (z ograniczonym kontekstem)...")
+        logger.info("Wysyłanie zapytania rekomendacji do OpenAI (z ograniczonym kontekstem)...")
         response = await client.chat.completions.create(
             model="gpt-5.1", 
             messages=[
@@ -134,12 +130,12 @@ Moje pytanie: {user_prompt}
         )
         
         raw_output = response.choices[0].message.content
-        logging.info("Pomyślnie odebrano odpowiedź z modelu rekomendacji.")
+        logger.info("Pomyślnie odebrano odpowiedź z modelu rekomendacji.")
         return raw_output
         
     except Exception as e:
-        logging.error(f"BŁĄD w generate_movie_recommendation podczas komunikacji z API: {e}")
-        logging.error(traceback.format_exc())
+        logger.error(f"BŁĄD w generate_movie_recommendation podczas komunikacji z API: {e}")
+        logger.error(traceback.format_exc())
         return "Przepraszam, ale w tej chwili mój rdzeń AI jest przeciążony. Spróbuj ponownie za chwilę."
 
 async def check_guardrail(user_prompt: str) -> GuardrailResult:
@@ -162,7 +158,7 @@ async def check_guardrail(user_prompt: str) -> GuardrailResult:
     """
     
     try:
-        logging.info("Wysyłanie zapytania Guardrail do OpenAI...")
+        logger.info("Wysyłanie zapytania Guardrail do OpenAI...")
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
             response_format={ "type": "json_object" }, 
@@ -174,12 +170,12 @@ async def check_guardrail(user_prompt: str) -> GuardrailResult:
         )
         
         raw_json = response.choices[0].message.content
-        logging.info(f"Surowa odpowiedź JSON z Guardrail: {raw_json}")
+        logger.info(f"Surowa odpowiedź JSON z Guardrail: {raw_json}")
         
         result_object = GuardrailResult.model_validate_json(raw_json)
         return result_object
         
     except Exception as e:
-        logging.error(f"BŁĄD w check_guardrail: {e}")
-        logging.error(traceback.format_exc())
+        logger.error(f"BŁĄD w check_guardrail: {e}")
+        logger.error(traceback.format_exc())
         return GuardrailResult(flagged=False, confidence=0.0, reason="Error fallback")

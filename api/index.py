@@ -16,6 +16,8 @@ from services.recommender_engine import recommender
 from dependencies import get_current_user
 from dotenv import load_dotenv
 from constants import FRONTEND_URL_DEFAULT, SERVICE_ACCOUNT_PATH
+from logtail import LogtailHandler
+import logging
 
 load_dotenv()
 frontend_url = os.getenv("FRONTEND_URL", FRONTEND_URL_DEFAULT)
@@ -26,6 +28,18 @@ except FileNotFoundError:
     print("Uwaga: Brak pliku bazy filmów. Pomijam inicjalizację silnika (Środowisko testowe/CI).")
 
 app = FastAPI()
+
+logger = logging.getLogger("recoflix_api")
+logger.setLevel(logging.INFO)
+
+logtail_token = os.environ.get("LOGTAIL_TOKEN")
+
+if logtail_token:
+    handler = LogtailHandler(source_token=logtail_token)
+    logger.addHandler(handler)
+    logger.info("Aplikacja Recoflix API uruchomiona i podłączona do Better Stack!")
+else:
+    print("Brak tokenu LOGTAIL_TOKEN w .env!")
 
 if not firebase_admin._apps:
     firebase_cert_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
@@ -53,6 +67,8 @@ app.include_router(admin.router)
 
 @app.get("/api/engine-status")
 async def get_status(user: dict = Depends(get_current_user)):
+    logger.info("Użytkownik wszedł na główny endpoint.")
+    
     return {
         "status": "online",
         "engine": "RecoFlix-XAI-v1",
