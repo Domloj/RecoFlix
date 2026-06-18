@@ -21,7 +21,7 @@ from constants import (
     TMDB_LANGUAGE_DEFAULT,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("recoflix_api")
 
 
 @dataclass(frozen=True)
@@ -126,10 +126,14 @@ class MoviesService:
         self.movies = self._load_movies_db()
         self.tmdb_links = self._load_tmdb_links()
         self.movie_tags = self._load_tags()
+        
+        logger.info(f"Zainicjalizowano MoviesService. Załadowano {len(self.movies)} filmów.")
 
     async def list_movies(
         self, page: int = 1, page_size: int = 50, query: str | None = None
     ) -> dict[str, Any]:
+        logger.info(f"Pobieranie listy filmów: strona {page}, rozmiar {page_size}, zapytanie: '{query}'")
+        
         page = max(page, 1)
         page_size = max(1, min(page_size, 200))
         filtered_movies = self._filter_movies(query)

@@ -11,3 +11,4 @@ pandas
 scikit-learn
 numpy
 pinecone
+logtail-python>=0.2.0
