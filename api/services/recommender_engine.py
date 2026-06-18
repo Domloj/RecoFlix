@@ -36,10 +36,14 @@ class HybridRecommender:
         self.tmdb_api_key = os.getenv("TMDB_API_KEY")
         self.tmdb_language = os.getenv("TMDB_LANGUAGE", "pl-PL")
 
-        # Inicjalizacja chmury
         self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-        pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
-        self.pinecone_index = pc.Index(os.environ.get("PINECONE_INDEX_NAME", "recoflix-movies"))
+        pinecone_key = os.environ.get("PINECONE_API_KEY")
+        if pinecone_key:
+            pc = Pinecone(api_key=pinecone_key)
+            self.pinecone_index = pc.Index(os.environ.get("PINECONE_INDEX_NAME", "recoflix-movies"))
+        else:
+            self.pinecone_index = None
+            logger.warning("Brak klucza PINECONE_API_KEY. Połączenie z Pinecone nieaktywne (tryb testowy).")
 
     # Inicjalizacja
     def initialize(self):
@@ -97,6 +101,10 @@ class HybridRecommender:
         """Rekomendacje dla pojedynczego tytułu (endpoint GET /api/recommendations/)."""
         if not self.is_ready:
             raise ValueError("Silnik nie został jeszcze zainicjalizowany.")
+            
+        if not self.pinecone_index:
+            logger.error("Brak Pinecone - zwrócono pustą listę rekomendacji.")
+            return None
 
         try:
             idx = self.movies[
@@ -158,6 +166,10 @@ class HybridRecommender:
         """Rekomendacje dla użytkownika na podstawie listy polubionych filmów (Pinecone + CF)."""
         if not self.is_ready:
             raise ValueError("Silnik nie został jeszcze zainicjalizowany.")
+            
+        if not self.pinecone_index:
+            logger.error("Brak Pinecone - zwrócono pustą listę rekomendacji.")
+            return None
 
         liked_indices = []
         liked_tmdb_ids = []
